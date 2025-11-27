@@ -25,3 +25,10 @@ When loggin in an account, if the user does not insert the correct password in 3
 - If the time is to be inside the program, since the program can not be running on background, there should be a first input inside a program that sets the start execution time, and based on that, should make the pertaining calcules for the late returning and pending aprovations  
 - If the function for repairing is created, it should be a simple request with a set timeout until the equipment is to be available again.  
 - Currently the program does not await for aprovation via de admin user, it needs to be done, the information of the pending aprovations for borrowing should be saved on the csv archives pertaining the users (new state for pending), there's the need to create inside the main a function to initialize and create the objects with the data on the csv  
+ 
+### Day 2 plan implementations:
+- Create class Borrow, user can create a borrow object and pass on the atribute itself and the equipment borrowing
+- Equipment MUST be an independent class, it should not store the user that borrow an Equipment iteration, as it would be the first to be charged from the csv
+- To initialize an alredy with information program, is necesary to first charge equipment, then users and finally borrows.
+- The program time must be initialized manually if not csv archives present, if not, then use the latest date and time present on borrow csv archives. 
+- The program must initialize the objects on start and store them inside Memory on the main
