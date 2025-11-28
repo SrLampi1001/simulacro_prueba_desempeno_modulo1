@@ -31,4 +31,12 @@ When loggin in an account, if the user does not insert the correct password in 3
 - Equipment MUST be an independent class, it should not store the user that borrow an Equipment iteration, as it would be the first to be charged from the csv
 - To initialize an alredy with information program, is necesary to first charge equipment, then users and finally borrows.
 - The program time must be initialized manually if not csv archives present, if not, then use the latest date and time present on borrow csv archives. 
-- The program must initialize the objects on start and store them inside Memory on the main
+- The program must initialize the objects on start and store them inside Memory on the main  
+
+### Day 2 plan implementations:
+- Borrow class must have states: "Pending", "going", "done"  
+Each state has his own particularities, the done ones are only for storing purporse and need no to be charged on memory from the csv archive  
+The pending state must exist in a separated list only visible to administrator, they are to be approved or rejected, rejected is not a state, it only deletes the borrow object from both the csv and program, does not need to leave a record, as it does not affect the monthly or yearly report  
+The going state should always be charged on memory and be present for the users that made the borrow, it should let them change the state to done when returning the equipment  
+- Equipments and users should be able to be deleted, cannot be deleted if they are being borrowed or borrowed something and still has not returned it.
+- Equipments deleted should not pose a problem for the csv charge of borrow objects, deleted equipment does not exist within the program, only on the csv borrow in state done
