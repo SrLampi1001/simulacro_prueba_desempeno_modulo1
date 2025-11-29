@@ -77,6 +77,13 @@ class Equipment:
         print(f"No equipment with id {id}")
         return None
     
+    @classmethod
+    def charge_equipment(cls):
+        folder = os.path.exists(cls.__equipment_path)
+        if not folder:
+            return
+        cls.__equipments
+
     def lend_equipment(self)->bool:
         """
         Changes the state of the Equipment object to "borrowed" and returns True

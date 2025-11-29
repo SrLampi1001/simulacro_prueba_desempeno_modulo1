@@ -5,6 +5,7 @@ from usuarios import User; from equipos import Equipment;
 class Borrow:
     __max_id = 0
     __borrow_record = {}
+    __borrow_requests = {}
     equipment : Equipment
     user : User
 
@@ -13,11 +14,12 @@ class Borrow:
         self.id = id
         self.equipment_id = equipment_id
         self.equipment_name = equipment_name
+        self.borrowing_username = borrowing_username
         self.user_type = user_type
+        self.state = state
         self.petition_date = petition_date
         self.aproved_date = aproved_date
-        self.state = state
-        self.month = returned_date
+        self.returned_date = returned_date
 
     @classmethod
     def create(cls, equipment_id, equipment_name, borrowing_username, user_type, state, petition_date, aproved_date = None, returned_date = None, id = None):
@@ -25,7 +27,7 @@ class Borrow:
         if id == None:
             id = cls.__max_id
         if state not in ["pending", "going", "done"]:
-            print("The state for a borrow given is not valid, only \"pending\", \"going\" and \"")
+            print("The state for a borrow given is not valid, only \"pending\", \"going\" and \"done\"")
             return None
         elif user_type not in ["student", "Instructor", "administrator"]:
             print(f"The user type given ({user_type}) is not valid")
@@ -42,7 +44,8 @@ class Borrow:
         cls.__max_id = id+1
 
         new_borrow = cls(id, equipment_name, borrowing_username, user_type, state, petition_date, aproved_date, returned_date, id)
-        if returned_date != None:
+        if returned_date != None:            
+            cls.__borrow_record[id] = new_borrow
             return new_borrow   #Do not create attributes equipment and user on borrow
         
         equipment = Equipment.get_equipment_w_id(equipment_id)
@@ -54,8 +57,19 @@ class Borrow:
         
         new_borrow.equipment = equipment
         new_borrow.user = user
+
+        if new_borrow.aproved_date == None:
+            cls.__borrow_requests[id] = new_borrow
+            return new_borrow
+        
+        cls.__borrow_record[id] = new_borrow
         return new_borrow
 
-    @classmethod
-    def calculateBorrowTime(cls, user:User, equipment:Equipment):
+    def calculateBorrowedTime(self):
+        date = self.aproved_date.split("/");
+        date[0] = int(date[0]); date[1] = int(date[1]); date[2] = int(date[2]); #Convert to INT all dates
+        returned_date = self.returned_date.split("/")
+        returned_date[0] = int(returned_date[0]); returned_date[1] = int(returned_date[1]); returned_date[2] = int(returned_date[2]); #Convert to INT all dates
+    
+    def delete_request(self):
         pass

@@ -1,12 +1,15 @@
 import os
 import csv
 from equipos import Equipment
+from prestamos import Borrow
 class User:
     __are_admins = False
     __criptid = ["_","a","6","d","m","7","h","ñ","8","e","i","l","2","j","c","f","v","4","g","b","9","n","y","k","$","5","q","t","r","x","o","1","s","p","u","0","z","3"]
     __users = {} #Dictionay to easy user validation
     __users_path = os.path.normpath("csv_archives"+os.path.pathsep+"users.csv")
     equipment_in_posesion : list[Equipment] #Shoul be a list of Equipments
+    #only admin options:
+    
     
     def __init__(self, username, password, rol, email): #The constructor MUST NOT be called directly to create users
         """
@@ -189,3 +192,10 @@ class User:
                 return True
         return False
     
+    #Admin exclusive options:
+    def see_borrow_request(self, borrow : Borrow):
+        for request in Borrow.__borrow_requests.items():
+            #id, equipment_id, equipment_name, borrowing_username, user_type, state, petition_date
+            print(f"""---------------------------------------------------------------------------------------------------------------
+            id: {request.id} - equipment id: {request.equipment_id} - equipment name: {request.equipment_name} - borrowing username: {request.borrowing_username} - user type: {request.user_type} - state : pending
+            ---------------------------------------------------------------------------------------------------------------------""")
