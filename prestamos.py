@@ -6,6 +6,7 @@ class Borrow:
     __max_id = 0
     __borrow_record = {}
     __borrow_requests = {}
+    __borrow_path = os.path.normpath("csv_archives"+os.path.pathsep+"borrows.csv")
     equipment : Equipment
     user : User
 
@@ -65,11 +66,89 @@ class Borrow:
         cls.__borrow_record[id] = new_borrow
         return new_borrow
 
+    @classmethod
+    def save_borrows(cls)->bool:
+        if not cls.create_borrow_csv():
+            print("Can not save the borrows")
+            return False
+        try:
+            with open(cls.__borrow_path, "w", newline="") as arch:
+                writer = csv.writer(arch)
+                writer.writerow(["id", "equipment_id", "equipment_name", "borrowing_username", "user_type", "state", "petition_date", "aproved_date", "returned_date"])
+                for borrow in cls.__borrow_record.values():
+                    writer.writerow([borrow.id, borrow.equipment_id, borrow.equipment_name, borrow.borrowing_username, borrow.user_type, borrow.state, borrow.petition_date, borrow.aproved_date, borrow.returned_date])
+        except Exception as exp:
+            print(f"An exception has ocurred while trying to save the borrows: {exp}")
+            return False
+        return True
+    
+    @classmethod
+    def create_directory(cls)->bool:
+        if not os.path.exists(os.path.dirname(cls.__borrow_path)):
+            try:
+                dir = os.path.dirname(cls.__borrow_path)
+                os.mkdir(dir)
+            except Exception as exp:
+                print(f"An exception has occured trying to create de directory: {exp}")
+                return False
+        if not os.path.exists(cls.__borrow_path):
+            try:
+                with open(cls.__borrow_path, "w", newline="") as archive:
+                    writer = csv.writer(archive)
+                    writer.writerow(["id", "equipment_id", "equipment_name", "borrowing_username", "user_type", "state", "petition_date", "aproved_date", "returned_date"])
+            except Exception as exp:
+                print(f"An exception has occured while trying to create the csv element: {exp}")
+                return False
+        return True
+
+    @classmethod
+    def load_borrows(cls)->bool:
+        if not os.path.exists(cls.__borrow_path):
+            print("There is no archive to upload")
+            return False
+        try:
+            with open(cls.__borrow_path, "r", newline="") as a:
+                reader = csv.reader(a)
+                next(reader)
+                for borrow in reader:
+                    cls.create(borrow[1], borrow[2], borrow[3], borrow[4],  borrow[5],  borrow[6],  borrow[7],  borrow[8],  borrow[0])
+        except Exception as exp:
+            print(f"There has been an Exception while trying to read the csv archive: {exp}")
+            return False
+        return True
+    @classmethod
+    def get_all_borrows(cls):
+        return cls.__borrow_record
+    @classmethod
+    def get_pending_borrows(cls):
+        return cls.__borrow_requests
+    @classmethod
+    def get_active_borrows(cls):
+        active = {}
+        for borrow_id, borrow in cls.__borrow_record.items():
+            if borrow.returned_date == None:
+                active[borrow_id] = borrow
+        return active
+    @classmethod
+    def get_borrow_w_id(cls, id):
+        if id not in cls.__borrow_record:
+            return None
+        return cls.__borrow_record[id]
+    
     def calculateBorrowedTime(self):
         date = self.aproved_date.split("/");
         date[0] = int(date[0]); date[1] = int(date[1]); date[2] = int(date[2]); #Convert to INT all dates
         returned_date = self.returned_date.split("/")
         returned_date[0] = int(returned_date[0]); returned_date[1] = int(returned_date[1]); returned_date[2] = int(returned_date[2]); #Convert to INT all dates
     
+    def aprove(self, time)->bool:
+        if self.state != "pending":
+            print(f"imposible to aprove, as the borrow state is {self.state}")
+            return False
+        self.state = "going"
+        self.aproved_date = time
+        del Borrow.__borrow_requests[self.id]
+        Borrow.__borrow_record[self.id] = self
+
     def delete_request(self):
         pass

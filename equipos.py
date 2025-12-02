@@ -42,32 +42,39 @@ class Equipment:
         Creates the equipments.csv arhive and csv_archives if they don't exist
         returns True if created, else False 
         """
-        dir  = os.path.dirname(cls.__equipment_path)
-        try: 
-            os.mkdir(dir)
+        if not os.path.exists(os.path.dirname(cls.__equipment_path)):
+            dir  = os.path.dirname(cls.__equipment_path)
+            try:
+                os.mkdir(dir)
+            except Exception as exp:
+                print(f"An Exception has occured while trying to create the directory: {exp}")
+                return False
+        if os.path.exists(cls.__equipment_path):
+            return True
+        try:             
             with open(cls.__equipment_path, "w", newline="") as archive:
                 writer = csv.writer(archive)
                 writer.writerow(["id", "name", "category", "actual_state", "registration_date"])
         except Exception as ex:
-            print(f"The directory couldn't be created, exception: {ex}")
+            print(f"The csv couldn't be created, exception: {ex}")
             return False
         return True
     
     @classmethod
-    def save_equipment(cls, equipment):
-        """
-        Saves the user on the csv archive
-        ONLY call for first time insertion
-        returns True if saved, else False
-        """
-        dir  = os.path.dirname(cls.__equipment_path)
-        if not os.path.exists(dir):
+    def save_equipment(cls)->True:
+        if not os.path.exists(cls.__equipment_path):
             if not cls.create_directory():
                 print("The csv archive wasn't created, the equipment cannot be saved")
                 return False
-        with open(cls.__equipment_path, "a", newline="") as equipments:
-            writer = csv.writer(equipments)
-            writer.writerow(equipment.get_equipment())
+        try:
+            with open(cls.__equipment_path, "w", newline="") as a:
+                writer = csv.writer(a)
+                writer.writerow(["id", "name", "category", "actual_state", "registration_date"])
+                for equipment in cls.__equipments.values():
+                    writer.writerow([equipment.id, equipment.name, equipment.category, equipment.actual_state, equipment.registration_date])
+        except Exception as exp:
+            print(f"An exception has ocurred while trying to save the equipment on the csv: {exp}")
+            return False
         return True
     
     @classmethod
@@ -78,11 +85,20 @@ class Equipment:
         return None
     
     @classmethod
-    def charge_equipment(cls):
-        folder = os.path.exists(cls.__equipment_path)
-        if not folder:
-            return
-        cls.__equipments
+    def load_equipment(cls)->bool:
+        if not os.path.exists(cls.__equipment_path):
+            print("There is no csv archive to load from")
+            return False
+        try:
+            with open(cls.__equipment_path, "r", newline="") as a:
+                reader = csv.reader(a)
+                next(reader)
+                for equipment in reader:
+                    cls.create(equipment[1],equipment[2], equipment[3], equipment[4], equipment[0])
+        except Exception as exp:
+            print(f"There has been an Exception while trying to read the csv archive {exp}")
+            return False
+        return True
 
     def lend_equipment(self)->bool:
         """

@@ -12,9 +12,6 @@ class User:
     
     
     def __init__(self, username, password, rol, email): #The constructor MUST NOT be called directly to create users
-        """
-        Constructor
-        """
         self.username = username
         self.password = password #Encrypts password
         self.email = email
@@ -87,7 +84,7 @@ class User:
             return None, True
 
     @classmethod
-    def charge_users(cls):
+    def load_users(cls):
         """
         Classmethod to charge the users stored on the csv file
         Returns True if succesfully charged, else False
@@ -95,11 +92,14 @@ class User:
         if not os.path.exists(cls.__users_path):
             print("The users.csv archive does not exist or is in another path")
             return False
-        with open(cls.__users_path, "r", newline="") as archive:
-            reader = csv.reader(archive)
-            next(reader)
-            for user in reader:
-                cls.create(user[0], user[1], user[2], user[3])
+        try:
+            with open(cls.__users_path, "r", newline="") as archive:
+                reader = csv.reader(archive)
+                next(reader)
+                for user in reader:
+                    cls.create(user[0], user[1], user[2], user[3])
+        except Exception as exp:
+            print(f"An exception has occurred while trying to read the csv archive: {exp}")
         return True
     
     @classmethod
@@ -120,19 +120,26 @@ class User:
         return True
     
     @classmethod
-    def create_directory(cls):
+    def create_directory(cls)->bool:
         """
         Creates the directory for the csv storing
         Creates the csv archive on the path and creates the header row
         """
-        try:
-            dir = os.path.dirname(cls.__users_path)
-            os.mkdir(dir)
+        dir = os.path.dirname(cls.__users_path)
+        if not os.path.exists(dir):
+            try:
+                os.mkdir(dir)
+            except Exception as exp:
+                print(f"An exception has occurred while trying to create de directory {exp}")
+                return False
+        if os.path.dirname(cls.__users_path):
+            return True
+        try:            
             with open(cls.__users_path, "w") as users:
                 writer = csv.writer(users)
                 writer.writerow(["user", "password", "rol", "email"])
         except Exception as ex:
-            print(f"Error, exception: {ex} creating the {dir} directory to save users")
+            print(f"Error, exception while trying to create csv to save users {ex}")
             return False
         return True
     
@@ -175,11 +182,6 @@ class User:
         return self.email
     
     def return_equipment(self, equipment_id, status)->bool:
-        """
-        receives status parameter from the user (Damaged or invalid)
-        Receives equipment id to return
-        Return True if equipment is returned, else False
-        """
         valid_status = ["available", "damaged"]
         if status not in valid_status:
             print(f"Error, {status} is not a valid status to return a equipment, only available or damaged")
@@ -193,9 +195,12 @@ class User:
         return False
     
     #Admin exclusive options:
-    def see_borrow_request(self, borrow : Borrow):
+    def see_borrow_request(self, borrow : Borrow,):
         for request in Borrow.__borrow_requests.items():
             #id, equipment_id, equipment_name, borrowing_username, user_type, state, petition_date
             print(f"""---------------------------------------------------------------------------------------------------------------
             id: {request.id} - equipment id: {request.equipment_id} - equipment name: {request.equipment_name} - borrowing username: {request.borrowing_username} - user type: {request.user_type} - state : pending
-            ---------------------------------------------------------------------------------------------------------------------""")
+            ---------------------------------------------------------------------------------------------------------------------""")   
+    def accept_borrow_reques(self, id_borrow, time):
+        borrow = Borrow.get_borrow_w_id(id_borrow)
+        borrow.aprove(time)

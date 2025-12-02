@@ -74,17 +74,23 @@ class Time:
     def start_time(self):
         self._simulate = True
         asyncio.run(self.run_time)
-
+    
+    def get_time(self):
+        time = f"{self._current_time[0] if self._current_time[0]<10 else "0"+self._current_time[0]}/{self._current_time[1] if self._current_time[1]<10 else "0"+self._current_time[1]}/{self._current_time[2] if self._current_time[2]<10 else "0"+self._current_time[2]}"
+        return time
+    def get_date(self):
+        date = f"{self._current_date[0] if self._current_date[0]<10 else "0"+self._current_date[0]}/{self._current_date[1] if self._current_date[1]<10 else "0"+self._current_date[1]}/{self._current_date[2]}"
 #reports
-from prestamos import Borrow
 from usuarios import User
+from equipos import Equipment
+from prestamos import Borrow
 class Report:
     _most_used_equipment :list
     _most_used_equipment_category : list
     _most_damaged_equipment : list
     _most_delayed_equipment : list
     _delayments_to_aprove : list
-    _most_demanding_user : list
+    _most_demanding_users : list
     _most_delayed_users : list
     #Normal users reports:
     equipments_borrowed : list
@@ -92,16 +98,74 @@ class Report:
     equipments_delayed : list
     equipments_in_borrow : list
 
-    def __init__(self, user:User, time_frame):
-        self.user = user
-        self.time_frame = time_frame
+    def get_most_used_equipment(self, admin: User, timeframe):
+        if not admin.get_rol() == "admin":
+            print("The user does not have the authority to get this report")
+            return
+        lis = Borrow.get_all_borrows()
+        most_used = {}
+        for borrow in lis.values():
+            if borrow.equipment_id not in most_used:
+                most_used[borrow.equipment_id] = 0
+            most_used[borrow.equipment_id] += 1
+        ordered = []; equipmt = []
+        for equip, times in most_used.items():
+            if len(ordered)==0:
+                ordered.append(times); equipmt.append(equip)
+            for a in range(len(ordered)):
+                if ordered[a] < times:
+                    ordered.insert(a, times)
+                    equipmt.insert(a, equip)
+                    break;
+        for i in range(len(equipmt)):
+            id = equipmt[i]
+            equipmt[i]= Equipment.get_equipment_w_id(id)
+        return equipmt
+    
+    def get_most_used_equipment_category(self, user: User, timeframe):
+        if not user.get_rol() == "admin":
+            print("The user does not have the authority to get this report")
+            return
 
+    def get_most_damaged_equipment(self, user: User, timeframe):
+        if not user.get_rol() == "admin":
+            print("The user does not have the authority to get this report")
+            return
+
+    def get_most_delayed_equipment(self, user: User, timeframe):
+        if not user.get_rol() == "admin":
+            print("The user does not have the authority to get this report")
+            return
     
-    def make_report(self, time_frame):
-        if self.user.get_rol() == "admin":
-            pass
-        report = [["Borrow", "Equipment borrowed", "state borrow"], ]
-        for borrow in self.borrows_list:
-            if borrow.returned_date == None:
-                pass
+    def get_most_demanding_users(self, user: User, timeframe):
+        if not user.get_rol() == "admin":
+            print("The user does not have the authority to get this report")
+            return
+
+    def get_most_delayed_users(self, user: User, timeframe):
+        if not user.get_rol() == "admin":
+            print("The user does not have the authority to get this report")
+            return
+
+    #Methods for normal users
+
+    def get_equipments_borrowed(self, user: User):
+        if not user.get_rol() != "admin":
+            print("The user does not have the authority to get this report")
+            return
     
+    def get_equipments_damaged(self, user: User):
+        if not user.get_rol() != "admin":
+            print("The user does not have the authority to get this report")
+            return
+    
+    def get_equipments_delayed(self, user: User):
+        if not user.get_rol() != "admin":
+            print("The user does not have the authority to get this report")
+            return
+    
+    def equipments_in_borrow(self, user: User):
+        if not user.get_rol() != "admin":
+            print("The user does not have the authority to get this report")
+            return
+        

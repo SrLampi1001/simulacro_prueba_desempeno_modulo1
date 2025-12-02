@@ -63,5 +63,9 @@ When loggin in an account, if the user does not insert the correct password in 3
 - Time will be changed from a class with static methods, to a unique object to insert it's reference inside the objects that need a time to calculate things (Like user)
 - to the admin user, there will be available an option to change the flow of time (accelerating it up or slowing it down), also stopping it.  
 - It SHOULD BE possible for the users (no admin) to see all available equipment and no-available equipment, and make borrow request to both of them, the admin then should obly be capable of aproving the available equipment ones, and wait for the unavailable equipment to be returned to accept.
-- users should be able to cancel a borrow request
+- users should be able to cancel a borrow request  
 
+### day 5 plan implementations:  
+- All the methods related with search shoul return Bool values, this will be for the main process to receive and process, deciding the flux of the program based on the return values.
+- Implementing the functions for organizing and catgorizing the diferent borrows, the results right now are inneficient and imposible to scalate to larger amounts. 
+- The application is not fit to scalating to a real project, too many n^2 and n^3 loops
